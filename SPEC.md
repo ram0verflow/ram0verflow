@@ -186,23 +186,34 @@ maximum difficulty.
 
 At every height that is a multiple of 16 and greater than zero:
 
+### At height $h \ge 528$ (v2 retargeting):
+
 ```
-actual   = timestamp[h−1] − timestamp[h−17]
+anchor   = max(0, h − 17)
+actual   = timestamp[h−1] − timestamp[anchor]
 actual   = clamp(actual, TIMESPAN/4, TIMESPAN·4)
 target'  = target · actual / TIMESPAN
 target'  = clamp(target', POW_CEILING, POW_LIMIT)
 ```
 
-where `TIMESPAN = 16 · 600` seconds (2 h 40 m). At all other heights, `bits` must
-equal the previous block's `bits`.
+where `TIMESPAN = 16 · 600` seconds (2 h 40 m), `POW_CEILING = 0x1d03ffff` ($k = 1024$), and `POW_LIMIT = 0x1e100000` ($k = 1$).
 
-**Deviation.** Bitcoin reads the first block of the *previous* window rather
-than the block immediately preceding the window being closed — an off-by-one present
-since 2009 that makes each retarget cover 2015 intervals instead of 2016. ROFL uses
-the full 16-interval window (`timestamp[h−1] − timestamp[h−17]`). Additionally, ROFL
-enforces a maximum difficulty ceiling `POW_CEILING = 0x1d03ffff` matching `k = 1024`,
-preventing difficulty from running away into unbounded territory when blocks are mined
-faster than the puzzle ceiling.
+### At height $0 < h < 528$ (legacy retargeting):
+
+Historically, blocks prior to height 528 evaluated difficulty without a ceiling clamp using the starting index of the window:
+
+```
+actual   = timestamp[h−1] − timestamp[h−16]
+actual   = clamp(actual, TIMESPAN/4, TIMESPAN·4)
+target'  = target · actual / TIMESPAN
+target'  = min(target', POW_LIMIT)
+```
+
+At all other heights (where $h \pmod{16} \ne 0$), `bits` must equal the previous block's `bits`.
+
+**Deviations and historical context.**
+1. **Window anchoring:** In legacy blocks ($h < 528$), the window difference `timestamp[h−1] − timestamp[h−16]` covered 15 intervals instead of 16 (omitting the boundary block between retarget windows, reproducing Bitcoin's 2009 off-by-one). Starting at height 528 (`RETARGET_V2_HEIGHT`), ROFL anchors to `h − 17` (`max(0, h − 17)`), measuring all 16 consecutive block intervals without omission.
+2. **Difficulty ceiling:** Because puzzle capacity is capped at $K_{\max} = 1024$ (§5), difficulty above 1024 does not require additional puzzle solutions. Starting at height 528, `target'` is clamped to `POW_CEILING = 0x1d03ffff` to prevent runaway difficulty from trapping the chain in exponential scale during fast mining stretches.
 
 ## 7. Subsidy
 
