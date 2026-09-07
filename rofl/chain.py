@@ -15,6 +15,7 @@ from .consensus import (
     Block,
     ConsensusError,
     RETARGET_INTERVAL,
+    RETARGET_V2_HEIGHT,
     UTXOSet,
     bits_to_target,
     block_subsidy,
@@ -49,7 +50,7 @@ def append_block(block: Block, path: str = BLOCKS_FILE) -> None:
         fh.write(json.dumps(block.to_dict(), separators=(",", ":"), sort_keys=True) + "\n")
 
 
-def bits_for_height(height: int, blocks) -> int:
+def bits_for_height(height: int, blocks, v2_height: int = RETARGET_V2_HEIGHT) -> int:
     """
     The difficulty a block at `height` must use.
 
@@ -63,10 +64,23 @@ def bits_for_height(height: int, blocks) -> int:
     prev = blocks[height - 1]
     if height % RETARGET_INTERVAL != 0:
         return prev.bits
-    first_index = height - RETARGET_INTERVAL
-    if first_index < 0:
-        return prev.bits
-    return next_bits(height, prev.bits, blocks[first_index].timestamp, prev.timestamp)
+
+    if height >= v2_height:
+        # V2: True 16-block window from the block prior to the window (height - 17) to (height - 1).
+        first_index = max(0, height - RETARGET_INTERVAL - 1)
+    else:
+        # Legacy: Reads height - 16 (15 intervals).
+        first_index = height - RETARGET_INTERVAL
+        if first_index < 0:
+            return prev.bits
+
+    return next_bits(
+        height,
+        prev.bits,
+        blocks[first_index].timestamp,
+        prev.timestamp,
+        v2_height=v2_height,
+    )
 
 
 class ChainState:

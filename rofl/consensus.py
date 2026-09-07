@@ -36,6 +36,12 @@ MAX_ADJUST_FACTOR = 4  # clamp, same as Bitcoin
 POW_LIMIT_BITS = 0x1E100000
 # Genesis difficulty (~2^24 hashes, roughly 30s of CPU mining).
 GENESIS_BITS = 0x1E010000
+# Hardest target the chain accepts (k = K_MAX = 1024 puzzles, ~2^30 hashes).
+# A ceiling stops runaway difficulty when blocks are solved faster than 10m.
+POW_CEILING_BITS = 0x1D03FFFF
+
+# Height at which difficulty adjustment v2 (true 16-block window and POW_CEILING_BITS) activates.
+RETARGET_V2_HEIGHT = 528
 
 COINBASE_MATURITY = 10  # blocks; Bitcoin uses 100
 MEDIAN_TIME_SPAN = 11  # blocks, same as Bitcoin
@@ -99,14 +105,18 @@ def difficulty(bits: int) -> float:
     return bits_to_target(POW_LIMIT_BITS) / bits_to_target(bits)
 
 
-def next_bits(height: int, prev_bits: int, first_ts: int, last_ts: int) -> int:
+def next_bits(
+    height: int,
+    prev_bits: int,
+    first_ts: int,
+    last_ts: int,
+    v2_height: int = RETARGET_V2_HEIGHT,
+) -> int:
     """
     Difficulty for the block at `height`.
 
     Retargets every RETARGET_INTERVAL blocks from the time actually taken by
     the previous window, clamped to a factor of 4 in either direction.
-    Unlike Bitcoin this reads the true first block of the window, without the
-    off-by-one that Bitcoin has carried since 2009.
     """
     if height % RETARGET_INTERVAL != 0 or height == 0:
         return prev_bits
@@ -119,6 +129,11 @@ def next_bits(height: int, prev_bits: int, first_ts: int, last_ts: int) -> int:
     new_target = bits_to_target(prev_bits) * actual // TARGET_TIMESPAN
     limit = bits_to_target(POW_LIMIT_BITS)
     new_target = min(new_target, limit)
+
+    if height >= v2_height:
+        ceiling = bits_to_target(POW_CEILING_BITS)
+        new_target = max(new_target, ceiling)
+
     return target_to_bits(new_target)
 
 

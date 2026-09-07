@@ -233,6 +233,32 @@ def run():
         lambda: chainmod.replay(good + [stale], now=now),
     )
 
+    # ---- v2 difficulty adjustment --------------------------------------
+    # 1. Test true 16-block window calculation without off-by-one
+    v2_blocks = list(good)
+    while len(v2_blocks) < 33:
+        v2_blocks.append(mine_block(v2_blocks, "ram0verflow", alice_addr))
+    expected_v2_bits = k.next_bits(
+        32,
+        v2_blocks[31].bits,
+        v2_blocks[15].timestamp,
+        v2_blocks[31].timestamp,
+        v2_height=32,
+    )
+    assert chainmod.bits_for_height(32, v2_blocks[:32], v2_height=32) == expected_v2_bits
+    ok("v2 difficulty retarget uses true 16-block window (anchor height 15)")
+
+    # 2. Test difficulty ceiling clamping to POW_CEILING_BITS
+    fast_bits = k.next_bits(
+        528,
+        0x17012b23,
+        1000,
+        1016,
+        v2_height=528,
+    )
+    assert fast_bits == k.POW_CEILING_BITS
+    ok(f"v2 difficulty retarget enforces ceiling POW_CEILING_BITS ({fast_bits:#010x})")
+
     # ---- final state ---------------------------------------------------
     final = chainmod.replay(good, now=now)
     print()

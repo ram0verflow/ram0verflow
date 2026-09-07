@@ -39,6 +39,7 @@ do not exist.
 | Median time span | 11 blocks | 11 blocks |
 | Max future drift | 7200 s | 7200 s |
 | Proof-of-work limit | `0x1e100000` (k = 1) | `0x1d00ffff` |
+| Proof-of-work ceiling | `0x1d03ffff` (k = 1024) | — |
 | Genesis difficulty | `0x1e010000` (k = 15) | `0x1d00ffff` |
 | Work function | subset-sum, n = 40 | double SHA-256 |
 | Max puzzles per block | 1024 | — |
@@ -186,20 +187,22 @@ maximum difficulty.
 At every height that is a multiple of 16 and greater than zero:
 
 ```
-actual   = timestamp[h−1] − timestamp[h−16]
+actual   = timestamp[h−1] − timestamp[h−17]
 actual   = clamp(actual, TIMESPAN/4, TIMESPAN·4)
 target'  = target · actual / TIMESPAN
-target'  = min(target', POW_LIMIT)
+target'  = clamp(target', POW_CEILING, POW_LIMIT)
 ```
 
 where `TIMESPAN = 16 · 600` seconds (2 h 40 m). At all other heights, `bits` must
 equal the previous block's `bits`.
 
 **Deviation.** Bitcoin reads the first block of the *previous* window rather
-than the first block of the window being closed — an off-by-one present since
-2009 that makes each retarget cover 2015 intervals instead of 2016. ROFL uses
-the correct window. This is the one place ROFL knowingly diverges from
-Bitcoin's behaviour rather than its parameters.
+than the block immediately preceding the window being closed — an off-by-one present
+since 2009 that makes each retarget cover 2015 intervals instead of 2016. ROFL uses
+the full 16-interval window (`timestamp[h−1] − timestamp[h−17]`). Additionally, ROFL
+enforces a maximum difficulty ceiling `POW_CEILING = 0x1d03ffff` matching `k = 1024`,
+preventing difficulty from running away into unbounded territory when blocks are mined
+faster than the puzzle ceiling.
 
 ## 7. Subsidy
 
