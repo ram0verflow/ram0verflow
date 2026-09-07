@@ -2,3 +2,11 @@ rofl-wallet.json
 __pycache__/
 *.pyc
 .venv/
+gpu/*.dll
+gpu/*.so
+gpu/*.dylib
+gpu/*.exp
+gpu/*.lib
+gpu/*.obj
+gpu/*.pdb
+gpu/*.o
