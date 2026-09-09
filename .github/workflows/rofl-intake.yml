@@ -1,0 +1,35 @@
+name: ROFL submission intake
+
+# GitHub disables comments once an issue reaches 2500 comments. Keep a fresh
+# labelled issue available before the current one reaches that hard limit.
+on:
+  schedule:
+    - cron: '0,10,20,30,40,50 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ensure_submission_issue.py
+      - .github/workflows/rofl-intake.yml
+
+concurrency:
+  group: rofl-intake
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  ensure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Ensure a writable submission issue exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 ensure_submission_issue.py

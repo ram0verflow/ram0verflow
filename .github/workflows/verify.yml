@@ -19,5 +19,7 @@ jobs:
           python-version: '3.11'
       - name: Consensus tests
         run: python3 tests/test_chain.py
+      - name: Submission intake tests
+        run: python3 tests/test_intake.py
       - name: Replay the chain from genesis
         run: python3 verify.py

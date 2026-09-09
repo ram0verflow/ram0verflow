@@ -81,3 +81,22 @@ jobs:
         run: |
           printf '%s\n' "$REPLY" > /tmp/reply.md
           gh issue comment "${{ github.event.issue.number }}" --body-file /tmp/reply.md
+
+  intake:
+    name: Keep a writable submission issue available
+    if: always()
+    needs: submit
+    concurrency:
+      group: rofl-intake
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check submission issue capacity
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 ensure_submission_issue.py

@@ -48,23 +48,27 @@ git remote add origin https://github.com/ram0verflow/ram0verflow.git
 git push -u origin main
 ```
 
-## 4. Open the two issues
+## 4. Open the first two submission issues
 
 Both need the label `rofl` — the workflow ignores comments anywhere else.
 
 ```bash
 gh label create rofl --description "ROFL chain submissions" --color 8A5F10
+gh label create rofl-active --description "Current writable ROFL submission issue" --color 2DA44E
 
-gh issue create --title "Mine a block" --label rofl --body \
-"Paste your \`rofl-block-v1:\` line as a comment. See the README to mine one."
+block_issue=$(gh issue create --title "Mine a block" --label rofl --body \
+"Paste your \`rofl-block-v1:\` line as a comment. See the README to mine one.")
 
 gh issue create --title "Mempool" --label rofl --body \
 "Paste your \`rofl-tx-v1:\` line as a comment to queue a transaction."
+
+gh issue edit "$block_issue" --add-label rofl-active
 ```
 
-These must end up as issues **#1** (blocks) and **#2** (mempool) for the
-README links to point at the right places. If they land on different numbers,
-edit the two links at the top of README.md.
+The active label is the stable target used by the README links. A maintenance
+workflow moves it to a fresh issue once the current one reaches 2200 comments,
+before GitHub disables comments at 2500. The second issue is the first standby;
+after that, the workflow creates new submission issues automatically.
 
 Pin both from the issue page so visitors find them.
 
