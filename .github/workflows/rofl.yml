@@ -84,7 +84,10 @@ jobs:
 
   intake:
     name: Keep a writable submission issue available
-    if: always()
+    if: >-
+      always() &&
+      github.event.issue.pull_request == null &&
+      contains(github.event.issue.labels.*.name, 'rofl')
     needs: submit
     concurrency:
       group: rofl-intake
