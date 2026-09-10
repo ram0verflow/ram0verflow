@@ -8,8 +8,8 @@
 <p align="center">
   <a href="https://ram0verflow.github.io/ram0verflow/"><b>Block explorer</b></a> ·
   <a href="SPEC.md"><b>Consensus spec</b></a> ·
-  <a href="../../issues/1"><b>Mine a block</b></a> ·
-  <a href="../../issues/2"><b>Send coins</b></a> ·
+  <a href="../../issues/1701"><b>Mine a block</b></a> ·
+  <a href="../../issues/1702"><b>Send coins</b></a> ·
   <a href="../../actions"><b>Node</b></a>
 </p>
 
@@ -143,7 +143,7 @@ python3 miner.py --miner YOUR_GITHUB_HANDLE --message "gm"
 
 It solves puzzles until the block is complete, then prints a line starting
 with `rofl-block-v1:`. Paste that as a comment on
-**[the block issue](../../issues/1)**. A workflow validates it and, if it
+**[the block issue](../../issues/1701)**. A workflow validates it and, if it
 holds up, appends it to the chain and updates this page.
 
 About half a minute at the starting difficulty. If the chain gets busy,
@@ -167,7 +167,7 @@ cannot be altered or stripped on the way, and it shows up in the ledger above.
 
 Two ways to submit it, and they do the same thing:
 
-- **Comment** on **[the mempool issue](../../issues/2)**. Ten seconds.
+- **Comment** on **[the mempool issue](../../issues/1702)**. Ten seconds.
 - **Pull request** adding one file under `chain/pending/`, if you want the
   contribution on your profile. The node reads the file, applies the
   transaction to `main` and closes the PR — it is never merged, so your
@@ -182,7 +182,7 @@ picked first, and the fee goes to whoever mines the block.
 python3 wallet.py identity --handle YOUR_GITHUB_HANDLE
 ```
 
-Post the `rofl-id-v1:` line it prints on **[the mempool issue](../../issues/2)**
+Post the `rofl-id-v1:` line it prints on **[the mempool issue](../../issues/1702)**
 from the account it names. The signature proves you hold the key; posting it
 from your account proves you hold the handle. Your name then appears beside
 your balance in the table above.
