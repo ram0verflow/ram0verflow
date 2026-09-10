@@ -194,7 +194,7 @@ def main() -> int:
                       f"but the chain is at `{state.height}`. Someone else got there "
                       f"first — that is what mining is. Re-run `miner.py` against the "
                       f"current tip and it will pick up the new work.",
-                      args.dry_run)
+                      args.dry_run, pace)
                 stale += 1
                 continue
 
@@ -265,7 +265,7 @@ def main() -> int:
         save_mempool(mempool)
         close(n, f"### Transaction queued\n\n`{tx.txid()}`\n\n"
                  f"Fee `{format_amount(fee)} ROFL`. It waits for the next block.",
-              args.dry_run)
+              args.dry_run, pace)
         queued += 1
 
     if not args.dry_run and (accepted or queued):
