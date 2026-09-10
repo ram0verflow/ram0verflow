@@ -169,7 +169,7 @@ def main():
     state = chainmod.replay(blocks, strict_time=False)
     height = state.height + 1
     bits = state.next_bits()
-    k = powfn.k_for_work(target_to_work(bits_to_target(bits)))
+    k = powfn.k_for_work(target_to_work(bits_to_target(bits)), height)
 
     txs, fees = ([], 0) if args.no_txs else select_txs(mempool, state, height)
     reward = block_subsidy(height) + fees

@@ -170,8 +170,15 @@ solved puzzles:
 
 ```
 work = 2²⁵⁶ ÷ (target + 1)          Bitcoin's chainwork formula, unchanged
-k    = clamp(work ÷ 2²⁰, 1, 1024)
+k    = clamp(work ÷ 2²⁰, 1, K_MAX)
+
+K_MAX = 1024   below height 1500
+K_MAX = 3000   from height 1500
 ```
+
+The cap exists because a block has to fit in a GitHub comment, and 3000
+solutions at 7 bytes each is about as far as that goes. It is a consensus
+value, so raising it is a height-gated rule change, not a configuration knob.
 
 `bits` uses Bitcoin's compact nBits encoding: an exponent byte followed by a
 three-byte mantissa, `target = mantissa · 256^(exponent−3)`, sign bit clear.
@@ -186,20 +193,29 @@ maximum difficulty.
 At every height that is a multiple of 16 and greater than zero:
 
 ```
-actual   = timestamp[h−1] − timestamp[h−16]
+actual   = timestamp[h−1] − timestamp[h−W]
 actual   = clamp(actual, TIMESPAN/4, TIMESPAN·4)
 target'  = target · actual / TIMESPAN
 target'  = min(target', POW_LIMIT)
+target'  = max(target', CEILING(h))
 ```
 
-where `TIMESPAN = 16 · 600` seconds (2 h 40 m). At all other heights, `bits` must
-equal the previous block's `bits`.
+where `TIMESPAN = 16 · 600` seconds (2 h 40 m). At all other heights, `bits`
+must equal the previous block's `bits`, subject to the same two bounds.
 
-**Deviation.** Bitcoin reads the first block of the *previous* window rather
-than the first block of the window being closed — an off-by-one present since
-2009 that makes each retarget cover 2015 intervals instead of 2016. ROFL uses
-the correct window. This is the one place ROFL knowingly diverges from
-Bitcoin's behaviour rather than its parameters.
+`W`, the window, is 16 below height 1500 and 17 from height 1500. Sixteen
+timestamps span fifteen intervals, so the original window measured fifteen
+intervals against a sixteen-interval target and tightened difficulty by 6.67%
+at every retarget whether or not blocks were running late.
+That is Bitcoin's own off-by-one, present since 2009; a note in this section
+previously claimed ROFL avoided it, and it did not. From 1500 it does.
+
+`CEILING(h)` is 0 below height 1500 and `2²⁵⁶ ÷ (K_MAX · 2²⁰)` from 1500 —
+the target at which `k` reaches the cap. Above the cap a harder target buys
+no additional work, so difficulty and block spacing come apart entirely: the
+live chain hit `k = 1024` at height 128 and difficulty then climbed past
+10³⁸ while the real work per block never moved. Blocks below 1500 keep the
+old rules exactly, so nothing already mined becomes invalid.
 
 ## 7. Subsidy
 

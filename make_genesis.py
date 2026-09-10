@@ -68,7 +68,7 @@ def main() -> int:
     )
 
     target = bits_to_target(GENESIS_BITS)
-    k = powfn.k_for_work(target_to_work(target))
+    k = powfn.k_for_work(target_to_work(target), 0)
     print(f"mining ROFL genesis at difficulty {difficulty(GENESIS_BITS):,.1f}")
     print(f"  puzzles  {k} x subset-sum(n={powfn.N})")
     print(f'  message  "{args.message}"')

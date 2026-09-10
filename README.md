@@ -121,7 +121,9 @@ Given 40 numbers and a target, find the subset that adds up to it exactly.
 Verifying an answer is one loop of additions. Finding one is meet-in-the-middle
 at 2²⁰ time *and* memory — and memory is what binds, which is why difficulty
 comes from solving *more* puzzles rather than bigger ones. A block at the floor
-needs 1; ten-minute spacing lands near 340.
+needs 1; the ceiling is 3,000, about as many solutions as fit in one GitHub
+comment. Difficulty stops there, because past that point a harder target buys
+no extra work.
 
 Nobody has built an ASIC for subset-sum. The reference solver in `miner.py` is
 deliberately plain, and beating it is the entire sport.

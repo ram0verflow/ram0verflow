@@ -1,0 +1,53 @@
+name: Roll over the submission threads
+
+# A GitHub issue accepts 2,500 comments and then quietly accepts no more.
+# Both submission threads reached that wall, which takes the channel down
+# with no error anyone can see. This opens a replacement before it happens
+# again and repoints the README.
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: rofl-rollover
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  rollover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check how full each thread is
+        id: roll
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 rollover.py
+
+      - name: Commit
+        if: steps.roll.outputs.rolled == 'true'
+        run: |
+          git config user.name  "rofl-node"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add chain/issues.json README.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "rofl: roll over submission threads (${{ steps.roll.outputs.summary }})"
+          for attempt in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash || exit 1
+          done
+          exit 1

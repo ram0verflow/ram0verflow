@@ -53,19 +53,27 @@ def bits_for_height(height: int, blocks) -> int:
     """
     The difficulty a block at `height` must use.
 
-    Blocks 0 and 1 use the genesis difficulty. On a retarget boundary the
-    window is the previous RETARGET_INTERVAL blocks.
+    Block 0 uses the genesis difficulty. On a retarget boundary the window is
+    the previous RETARGET_INTERVAL blocks.
+
+    From RETARGET_V2_HEIGHT the window starts one block earlier, so it spans
+    16 real intervals rather than 15. Measuring 15 against a 16-interval
+    target biased every retarget by 6.67% -- the same off-by-one Bitcoin has
+    carried since 2009, and which this chain's spec wrongly claimed to avoid.
     """
-    from .consensus import GENESIS_BITS
+    from .consensus import GENESIS_BITS, RETARGET_V2_HEIGHT
 
     if height == 0:
         return GENESIS_BITS
     prev = blocks[height - 1]
+
     if height % RETARGET_INTERVAL != 0:
-        return prev.bits
-    first_index = height - RETARGET_INTERVAL
+        return next_bits(height, prev.bits, 0, 0)
+
+    offset = RETARGET_INTERVAL + 1 if height >= RETARGET_V2_HEIGHT else RETARGET_INTERVAL
+    first_index = height - offset
     if first_index < 0:
-        return prev.bits
+        return next_bits(height, prev.bits, 0, 0)
     return next_bits(height, prev.bits, blocks[first_index].timestamp, prev.timestamp)
 
 

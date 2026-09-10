@@ -1,19 +1,22 @@
 name: ROFL node
 
-# Validates block, transaction, and identity submissions posted as issue comments.
+# Validates submissions posted as issue comments: blocks, transactions and
+# identity registrations.
 #
-# This workflow never mines. Mining happens on the submitter's own machine;
-# all that runs here is validation, which is a handful of hashes and
-# signature checks and finishes in seconds.
+# This workflow never mines. All that runs here is validation, which is a
+# handful of hashes and signature checks.
 
 on:
   issue_comment:
     types: [created]
 
-# One submission at a time. Without this, two blocks arriving together
-# could both validate against the same tip and race on the push.
+# Per issue, not chain-wide. GitHub keeps at most one run queued per group and
+# cancels the rest, so a chain-wide group would silently drop submissions that
+# arrive together. Serialisation happens at the git layer instead: the apply
+# step revalidates against the current tip on every attempt, which is the only
+# check that is correct anyway -- a block valid against an older tip is stale.
 concurrency:
-  group: rofl-chain
+  group: rofl-issue-${{ github.event.issue.number }}
   cancel-in-progress: false
 
 permissions:
@@ -30,7 +33,7 @@ jobs:
        contains(github.event.comment.body, 'rofl-tx-v1:') ||
        contains(github.event.comment.body, 'rofl-id-v1:'))
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -41,41 +44,48 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Validate submission
+      - name: Validate against the current tip, apply, push
         id: rofl
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
           COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
-        run: python3 submit.py
-
-      - name: Verify the whole chain still replays
-        if: steps.rofl.outputs.changed == 'true'
-        run: python3 verify.py
-
-      - name: Commit
-        if: steps.rofl.outputs.changed == 'true'
         run: |
+          set -uo pipefail
           git config user.name  "rofl-node"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add chain/ README.md assets/ 2>/dev/null || true
-          if git diff --cached --quiet; then
-            echo "nothing to commit"
-            exit 0
-          fi
-          git commit -m "rofl: submission from @${{ github.event.comment.user.login }}"
-          for attempt in 1 2 3; do
-            if git push; then
-              exit 0
+          printf '%s' "$COMMENT_BODY" > /tmp/submission.txt
+
+          finish() {  # copy this attempt's reply into the real step output
+            cat /tmp/out.txt >> "$GITHUB_OUTPUT"
+            exit "$1"
+          }
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            : > /tmp/out.txt
+            GITHUB_OUTPUT=/tmp/out.txt COMMENT_BODY="$(cat /tmp/submission.txt)" \
+              python3 submit.py || finish 1
+
+            if ! grep -qx 'changed=true' /tmp/out.txt; then
+              echo "rejected or already known — nothing to commit"
+              finish 0
             fi
-            echo "push rejected, rebasing (attempt $attempt)"
-            git pull --rebase --autostash || exit 1
-            python3 verify.py || exit 1
+
+            python3 verify.py || finish 1
+
+            git add chain/ README.md assets/ 2>/dev/null || true
+            if git diff --cached --quiet; then finish 0; fi
+            git commit -m "rofl: submission from @$COMMENT_AUTHOR"
+            if git push; then finish 0; fi
+            echo "push raced with another submission; revalidating against the new tip"
           done
-          echo "could not push after 3 attempts"
-          exit 1
+          echo "gave up after five attempts"
+          finish 1
 
       - name: Reply to the comment
-        if: always() && steps.rofl.outcome == 'success'
+        if: always() && steps.rofl.outputs.reply != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPLY: ${{ steps.rofl.outputs.reply }}

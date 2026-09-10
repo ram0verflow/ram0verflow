@@ -6,18 +6,14 @@ name: Heartbeat
 # immediately without doing any work. If the chain has gone stale past the
 # target spacing it mines one block at the current difficulty and commits it.
 #
-# Real miners always take precedence: they submit through the node workflow,
-# which shares this concurrency group, and any block they land resets the tip
-# age so the next scheduled check does nothing.
+# Real miners always take precedence. The tip is re-read immediately before
+# each commit, so a block that lands mid-run makes this exit without pushing.
 
 on:
   schedule:
     # Explicit minute list — more reliable than */10 on new repos.
     - cron: '0,10,20,30,40,50 * * * *'
   workflow_dispatch:
-  # Backup when cron is delayed — any push re-checks tip age.
-  push:
-    branches: [main]
 
 concurrency:
   group: rofl-chain
@@ -40,25 +36,30 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Check the tip, mine if stale
+      - name: Check the tip, mine if stale, push
         id: beat
-        run: python3 heartbeat.py
-
-      - name: Verify the chain still replays
-        if: steps.beat.outputs.mined == 'true'
-        run: python3 verify.py
-
-      - name: Commit
-        if: steps.beat.outputs.mined == 'true'
         run: |
+          set -uo pipefail
           git config user.name  "rofl-node"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add chain/ README.md assets/ 2>/dev/null || true
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "rofl: block ${{ steps.beat.outputs.height }}"
+
           for attempt in 1 2 3; do
-            git push && exit 0
-            git pull --rebase --autostash || exit 1
+            # Re-read main each time. If a real miner landed a block while this
+            # one was being mined, the tip is no longer stale and this exits.
+            git fetch origin main
+            git reset --hard origin/main
+
+            : > /tmp/out.txt
+            GITHUB_OUTPUT=/tmp/out.txt python3 heartbeat.py || exit 1
+            grep -qx 'mined=true' /tmp/out.txt || exit 0
+
             python3 verify.py || exit 1
+
+            git add chain/ README.md assets/ 2>/dev/null || true
+            if git diff --cached --quiet; then exit 0; fi
+            height=$(grep '^height=' /tmp/out.txt | cut -d= -f2)
+            git commit -m "rofl: block $height"
+            if git push; then exit 0; fi
+            echo "push raced with a submission; re-checking the tip"
           done
           exit 1

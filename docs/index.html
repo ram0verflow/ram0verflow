@@ -210,7 +210,7 @@ function banner() {
 function statsRow() {
   const t = STATE.tip, h = STATE.height;
   const nb = nextBits(h + 1, STATE.blocks);
-  const k = kForWork(targetToWork(bitsToTarget(t.bits)));
+  const k = kForWork(targetToWork(bitsToTarget(t.bits)), t.height);
   const retarget = RETARGET_INTERVAL - ((h + 1) % RETARGET_INTERVAL);
   const halving = HALVING_INTERVAL - ((h + 1) % HALVING_INTERVAL);
   const spans = STATE.blocks.slice(-11).map(b => b.timestamp);
@@ -237,7 +237,7 @@ function blockStrip() {
   return `<h2>Blocks <em>newest first</em></h2><div class="strip">` + list.map(b => {
     const cb = b.txs[0];
     return `<a class="blk" href="#/block/${b.height}">
-      <span class="puz">${kForWork(targetToWork(bitsToTarget(b.bits)))}p</span>
+      <span class="puz">${kForWork(targetToWork(bitsToTarget(b.bits)), b.height)}p</span>
       <div class="h">#${b.height}</div>
       <div class="m">@${esc(b.miner)}</div>
       <div class="msg">${esc(cb.coinbase || "")}</div>
@@ -368,7 +368,7 @@ function blockView(h) {
   const b = STATE.blocks[h];
   if (!b) return notFound(`No block at height ${h}.`);
   const cb = b.txs[0];
-  const k = kForWork(targetToWork(bitsToTarget(b.bits)));
+  const k = kForWork(targetToWork(bitsToTarget(b.bits)), b.height);
   const sols = (() => { try { return decodeSolutions(b.solution); } catch { return []; } })();
   const rows = [
     ["Hash", `<code>${blockHash(b)}</code>`],
@@ -546,8 +546,6 @@ youBtn.onclick = () => {
 };
 try { paintYou(); } catch { youBtn.textContent = "set your handle"; }
 window.addEventListener("hashchange", route);
-// Relative times are computed at render; tick so "4s ago" doesn't freeze on screen.
-setInterval(() => { if (STATE && !document.hidden) route(); }, 30000);
 load();
 </script>
 </body>

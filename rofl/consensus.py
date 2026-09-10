@@ -37,6 +37,10 @@ POW_LIMIT_BITS = 0x1E100000
 # Genesis difficulty (~2^24 hashes, roughly 30s of CPU mining).
 GENESIS_BITS = 0x1E010000
 
+# Consensus change activated at this height. Blocks below it keep the original
+# rules exactly, so nothing already mined is invalidated.
+RETARGET_V2_HEIGHT = 1500
+
 COINBASE_MATURITY = 10  # blocks; Bitcoin uses 100
 MEDIAN_TIME_SPAN = 11  # blocks, same as Bitcoin
 MAX_FUTURE_DRIFT = 2 * 3600  # seconds, same as Bitcoin
@@ -99,26 +103,42 @@ def difficulty(bits: int) -> float:
     return bits_to_target(POW_LIMIT_BITS) / bits_to_target(bits)
 
 
+def ceiling_target(height: int) -> int:
+    """
+    Hardest target allowed at `height`, i.e. the difficulty ceiling.
+
+    Difficulty above the puzzle cap buys no extra work, so letting it climb
+    past that point only produces a meaningless number. Before V2 there is no
+    ceiling, which is how the live chain reached 5e17.
+    """
+    from . import pow as powfn
+
+    if height < RETARGET_V2_HEIGHT:
+        return 0
+    return (1 << 256) // (powfn.K_MAX_V2 * powfn.UNIT_WORK)
+
+
 def next_bits(height: int, prev_bits: int, first_ts: int, last_ts: int) -> int:
     """
     Difficulty for the block at `height`.
 
-    Retargets every RETARGET_INTERVAL blocks from the time actually taken by
-    the previous window, clamped to a factor of 4 in either direction.
-    Unlike Bitcoin this reads the true first block of the window, without the
-    off-by-one that Bitcoin has carried since 2009.
+    Retargets every RETARGET_INTERVAL blocks from the time the previous window
+    actually took, clamped to a factor of 4 either way, then held between the
+    proof-of-work limit and the ceiling.
     """
     if height % RETARGET_INTERVAL != 0 or height == 0:
-        return prev_bits
+        new_target = bits_to_target(prev_bits)
+    else:
+        actual = last_ts - first_ts
+        low = TARGET_TIMESPAN // MAX_ADJUST_FACTOR
+        high = TARGET_TIMESPAN * MAX_ADJUST_FACTOR
+        actual = max(low, min(high, actual))
+        new_target = bits_to_target(prev_bits) * actual // TARGET_TIMESPAN
 
-    actual = last_ts - first_ts
-    low = TARGET_TIMESPAN // MAX_ADJUST_FACTOR
-    high = TARGET_TIMESPAN * MAX_ADJUST_FACTOR
-    actual = max(low, min(high, actual))
-
-    new_target = bits_to_target(prev_bits) * actual // TARGET_TIMESPAN
-    limit = bits_to_target(POW_LIMIT_BITS)
-    new_target = min(new_target, limit)
+    new_target = min(new_target, bits_to_target(POW_LIMIT_BITS))
+    floor_t = ceiling_target(height)
+    if floor_t:
+        new_target = max(new_target, floor_t)
     return target_to_bits(new_target)
 
 
@@ -306,7 +326,7 @@ class Block:
 
     def puzzles(self) -> int:
         """How many puzzles this block's difficulty demands."""
-        return powfn.k_for_work(target_to_work(bits_to_target(self.bits)))
+        return powfn.k_for_work(target_to_work(bits_to_target(self.bits)), self.height)
 
     def work(self) -> int:
         return target_to_work(bits_to_target(self.bits))

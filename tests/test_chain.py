@@ -233,6 +233,46 @@ def run():
         lambda: chainmod.replay(good + [stale], now=now),
     )
 
+    # ---- the V2 retarget rules ------------------------------------------
+    from rofl import pow as powfn
+
+    V2 = k.RETARGET_V2_HEIGHT
+    assert powfn.k_max_for(V2 - 1) == powfn.K_MAX
+    assert powfn.k_max_for(V2) == powfn.K_MAX_V2
+    ok(f"puzzle cap rises from {powfn.K_MAX} to {powfn.K_MAX_V2} at height {V2}")
+
+    # A target far past the cap is clamped back to the ceiling from V2 on,
+    # and left alone below it. Difficulty above the cap buys no extra work.
+    absurd = k.target_to_bits(k.bits_to_target(k.POW_LIMIT_BITS) // 10**20)
+    assert k.next_bits(V2 - 1, absurd, 0, 0) == absurd
+    capped = k.next_bits(V2, absurd, 0, 0)
+    assert capped != absurd
+    # nBits keeps three mantissa bytes, so the encoded target sits at or just
+    # under the ceiling — never above it.
+    ceiling = k.ceiling_target(V2)
+    assert ceiling * 999 // 1000 <= k.bits_to_target(capped) <= ceiling
+    assert powfn.k_for_work(k.target_to_work(k.bits_to_target(capped)), V2) == powfn.K_MAX_V2
+    ok("difficulty above the puzzle cap is clamped to the ceiling from V2")
+
+    # The retarget window. Sixteen timestamps span fifteen intervals, so on a
+    # chain running exactly on target the pre-V2 window reads 15/16 of the
+    # timespan and tightens difficulty by 6.67% every time. From V2 the window
+    # starts one block earlier and a perfectly-paced chain holds steady.
+    class _B:
+        def __init__(self, h, ts, bits):
+            self.height, self.timestamp, self.bits = h, ts, bits
+
+    def window_bits(boundary):
+        flat = [_B(h, h * k.TARGET_SPACING, k.GENESIS_BITS) for h in range(boundary)]
+        return chainmod.bits_for_height(boundary, flat)
+
+    genesis_target = k.bits_to_target(k.GENESIS_BITS)
+    pre = window_bits(k.RETARGET_INTERVAL * 8)  # a boundary well below V2
+    assert k.bits_to_target(pre) == genesis_target * 15 // 16
+    post = window_bits(V2 + k.RETARGET_INTERVAL - (V2 % k.RETARGET_INTERVAL))
+    assert k.bits_to_target(post) == genesis_target
+    ok("pre-V2 window ran 6.67% hot; the V2 window holds an on-target chain flat")
+
     # ---- final state ---------------------------------------------------
     final = chainmod.replay(good, now=now)
     print()

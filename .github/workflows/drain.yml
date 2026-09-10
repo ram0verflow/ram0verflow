@@ -1,0 +1,63 @@
+name: Drain the pull request queue
+
+# Manual. Replays the chain once, then walks every open submission against
+# that one in-memory state: applies what is valid, closes what is stale, and
+# leaves ordinary code pull requests alone.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'How many pull requests to handle'
+        default: '1000'
+      dry_run:
+        description: 'Report only, change nothing'
+        type: boolean
+        default: true
+
+concurrency:
+  group: rofl-drain
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  drain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Walk the queue
+        id: drain
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 drain.py --limit "${{ inputs.limit }}" \
+            ${{ inputs.dry_run == true && '--dry-run' || '' }}
+
+      - name: Verify and commit
+        if: steps.drain.outputs.changed == 'true'
+        run: |
+          python3 verify.py
+          git config user.name  "rofl-node"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add chain/ README.md assets/ 2>/dev/null || true
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "rofl: drain the pull request queue"
+          for attempt in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash || exit 1
+            python3 verify.py || exit 1
+          done
+          exit 1

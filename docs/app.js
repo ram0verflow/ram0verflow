@@ -16,7 +16,10 @@ const GENESIS_BITS = 0x1e010000;
 const COINBASE_MATURITY = 10;
 const INITIAL_SUBSIDY = 50n * COIN;
 /* subset-sum work function (rofl/pow.py) */
-const PN = 40, PB = 38, UNIT_WORK = 1n << 20n, K_MAX = 1024n, SOL_BYTES = 7;
+const PN = 40, PB = 38, UNIT_WORK = 1n << 20n, SOL_BYTES = 7;
+const K_MAX = 1024n;        // puzzles per block before RETARGET_V2_HEIGHT
+const K_MAX_V2 = 3000n;     // after it; ~the most that still fits a comment
+const RETARGET_V2_HEIGHT = 1500;
 
 /* ---------- SHA-256, synchronous ---------- */
 const K256 = new Uint32Array([
@@ -90,26 +93,45 @@ function bitsToTarget(bits) {
 const targetToWork = t => (1n << 256n) / (t + 1n);
 const difficultyOf = bits =>
   Number(bitsToTarget(POW_LIMIT_BITS) * 1000n / bitsToTarget(bits)) / 1000;
-function kForWork(work) {
+const kMaxFor = height => (height >= RETARGET_V2_HEIGHT ? K_MAX_V2 : K_MAX);
+function kForWork(work, height = 0) {
+  const cap = kMaxFor(height);
   const k = work / UNIT_WORK;
-  return k < 1n ? 1n : (k > K_MAX ? K_MAX : k);
+  return k < 1n ? 1n : (k > cap ? cap : k);
 }
+/* Hardest target allowed at a height. Difficulty past the puzzle cap buys no
+   extra work, so above V2 the target is not allowed below this floor. */
+const ceilingTarget = height =>
+  height < RETARGET_V2_HEIGHT ? 0n : (1n << 256n) / (K_MAX_V2 * UNIT_WORK);
 function subsidy(height) {
   const halvings = Math.floor(height / HALVING_INTERVAL);
   return halvings >= 64 ? 0n : INITIAL_SUBSIDY >> BigInt(halvings);
 }
+function nextBitsFrom(height, prevBits, firstTs, lastTs) {
+  let t;
+  if (height % RETARGET_INTERVAL !== 0 || height === 0) {
+    t = bitsToTarget(prevBits);
+  } else {
+    let actual = lastTs - firstTs;
+    actual = Math.max(TARGET_TIMESPAN / MAX_ADJUST, Math.min(TARGET_TIMESPAN * MAX_ADJUST, actual));
+    t = bitsToTarget(prevBits) * BigInt(Math.trunc(actual)) / BigInt(TARGET_TIMESPAN);
+  }
+  const lim = bitsToTarget(POW_LIMIT_BITS);
+  if (t > lim) t = lim;
+  const floor = ceilingTarget(height);
+  if (floor && t < floor) t = floor;
+  return targetToBits(t);
+}
 function nextBits(height, blocks) {
   if (height === 0) return GENESIS_BITS;
   const prev = blocks[height - 1];
-  if (height % RETARGET_INTERVAL !== 0) return prev.bits;
-  const first = blocks[height - RETARGET_INTERVAL];
-  if (!first) return prev.bits;
-  let actual = prev.timestamp - first.timestamp;
-  actual = Math.max(TARGET_TIMESPAN / MAX_ADJUST, Math.min(TARGET_TIMESPAN * MAX_ADJUST, actual));
-  let t = bitsToTarget(prev.bits) * BigInt(Math.round(actual)) / BigInt(TARGET_TIMESPAN);
-  const lim = bitsToTarget(POW_LIMIT_BITS);
-  if (t > lim) t = lim;
-  return targetToBits(t);
+  if (height % RETARGET_INTERVAL !== 0) return nextBitsFrom(height, prev.bits, 0, 0);
+  /* From V2 the window starts one block earlier, so it spans 16 real
+     intervals rather than 15 — the off-by-one Bitcoin has carried since 2009. */
+  const offset = height >= RETARGET_V2_HEIGHT ? RETARGET_INTERVAL + 1 : RETARGET_INTERVAL;
+  const first = blocks[height - offset];
+  if (!first) return nextBitsFrom(height, prev.bits, 0, 0);
+  return nextBitsFrom(height, prev.bits, first.timestamp, prev.timestamp);
 }
 function targetToBits(target) {
   let raw = target.toString(16); if (raw.length % 2) raw = "0" + raw;
@@ -181,7 +203,7 @@ function decodeSolutions(blob) {
   return out;
 }
 function checkPow(b) {
-  const k = Number(kForWork(targetToWork(bitsToTarget(b.bits))));
+  const k = Number(kForWork(targetToWork(bitsToTarget(b.bits)), b.height));
   let sols;
   try { sols = decodeSolutions(b.solution); }
   catch (e) { return `malformed solution: ${e.message}`; }

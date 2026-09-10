@@ -68,14 +68,30 @@ import hashlib
 N = 40  # numbers per puzzle; fixed, because memory not time is the wall
 B = N - 2  # bit width of each number, giving density n/b ≈ 1.05
 UNIT_WORK = 1 << (N // 2)  # 2^20, the cost of one puzzle
-K_MAX = 1024  # ceiling on puzzles per block, so blocks stay verifiable
+K_MAX = 1024  # puzzles per block before RETARGET_V2_HEIGHT
+K_MAX_V2 = 3000  # after it; ~the most that still fits a GitHub comment
 MAX_NONCE = 1 << 16  # per-puzzle nonce is 2 bytes on the wire
 SOLUTION_BYTES = 7  # 2-byte nonce + 5-byte subset mask
 
 
-def k_for_work(work: int) -> int:
+def k_max_for(height: int) -> int:
+    """
+    The puzzle cap in force at `height`.
+
+    The original 1024 was reached at block 128, after which every retarget
+    raised difficulty and bought no extra work -- so block spacing stopped
+    responding to difficulty at all. V2 raises it enough for the retarget to
+    steer again, and stops just short of the point where a block no longer
+    fits in a GitHub comment.
+    """
+    from .consensus import RETARGET_V2_HEIGHT
+
+    return K_MAX_V2 if height >= RETARGET_V2_HEIGHT else K_MAX
+
+
+def k_for_work(work: int, height: int = 0) -> int:
     """Puzzles required for a given amount of work. Integer arithmetic only."""
-    return max(1, min(K_MAX, work // UNIT_WORK))
+    return max(1, min(k_max_for(height), work // UNIT_WORK))
 
 
 def instance(header_core: bytes, j: int, nonce: int):
