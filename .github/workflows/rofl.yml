@@ -1,6 +1,6 @@
 name: ROFL node
 
-# Validates block and transaction submissions posted as issue comments.
+# Validates block, transaction, and identity submissions posted as issue comments.
 #
 # This workflow never mines. Mining happens on the submitter's own machine;
 # all that runs here is validation, which is a handful of hashes and
@@ -27,7 +27,8 @@ jobs:
       github.event.issue.pull_request == null &&
       contains(github.event.issue.labels.*.name, 'rofl') &&
       (contains(github.event.comment.body, 'rofl-block-v1:') ||
-       contains(github.event.comment.body, 'rofl-tx-v1:'))
+       contains(github.event.comment.body, 'rofl-tx-v1:') ||
+       contains(github.event.comment.body, 'rofl-id-v1:'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
