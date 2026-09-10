@@ -126,7 +126,10 @@ comment. Difficulty stops there, because past that point a harder target buys
 no extra work.
 
 Nobody has built an ASIC for subset-sum. The reference solver in `miner.py` is
-deliberately plain, and beating it is the entire sport.
+deliberately plain, and beating it is the entire sport. @ksanjeev284's
+[CUDA solver](https://github.com/ksanjeev284/ram0verflow/tree/feat/cuda-gpu-solver)
+is the fastest one anybody has published so far — it stays out of here because
+"no dependencies" is the pitch, not because it doesn't work.
 
 The full rules, the measurements behind every constant, and each place this
 knowingly diverges from Bitcoin, are in [SPEC.md](SPEC.md).
