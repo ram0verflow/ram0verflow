@@ -57,6 +57,28 @@ def gh(*args: str) -> str:
     return subprocess.run(["gh", *args], check=True, capture_output=True, text=True).stdout
 
 
+def gh_write(*args: str) -> bool:
+    """
+    A mutating gh call, with backoff.
+
+    GitHub throttles content creation at roughly 80 requests a minute and 500
+    an hour, and answers a breach with 403 rather than 429. Closing a queue
+    this size means thousands of writes, so every one is paced and a refusal
+    waits rather than aborting the run.
+    """
+    for attempt in range(5):
+        try:
+            gh(*args)
+            return True
+        except subprocess.CalledProcessError as exc:
+            err = (exc.stderr or "").strip().splitlines()[-1:] or [""]
+            wait = 30 * (attempt + 1)
+            print(f"      gh {args[0]} {args[1]} failed ({err[0][:90]}); "
+                  f"waiting {wait}s")
+            time.sleep(wait)
+    return False
+
+
 def api(path: str, **kw):
     return json.loads(gh("api", path, **kw))
 
@@ -89,19 +111,25 @@ def submitted_file(pr) -> str | None:
     return base64.b64decode(blob["content"]).decode("utf-8", "replace")
 
 
-def close(number: int, body: str, dry: bool) -> None:
+def close(number: int, body: str, dry: bool, pace: float = 0.0) -> None:
     print(f"    #{number}: {body.splitlines()[0]}")
     if dry:
         return
-    gh("pr", "comment", str(number), "--body", body)
-    gh("pr", "close", str(number))
+    gh_write("pr", "comment", str(number), "--body", body)
+    gh_write("pr", "close", str(number))
+    if pace:
+        time.sleep(pace)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=1000)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--pace", type=float, default=9.0,
+                    help="seconds between pull requests; keeps writes under "
+                         "GitHub's hourly content-creation limit")
     args = ap.parse_args()
+    pace = 0.0 if args.dry_run else args.pace
 
     if not REPO:
         print("GITHUB_REPOSITORY is not set")
@@ -133,13 +161,13 @@ def main() -> int:
         kind, payload = find_payload(body)
         if not kind:
             close(n, "**Rejected.** No `rofl-block-v1:`, `rofl-tx-v1:` or "
-                     "`rofl-id-v1:` line in that file.", args.dry_run)
+                     "`rofl-id-v1:` line in that file.", args.dry_run, pace)
             rejected += 1
             continue
 
         if kind == "id":
             reply, changed = handle_identity(payload, author)
-            close(n, reply, args.dry_run)
+            close(n, reply, args.dry_run, pace)
             queued += changed
             rejected += not changed
             continue
@@ -147,7 +175,7 @@ def main() -> int:
         try:
             data = json.loads(base64.b64decode(payload, validate=True))
         except Exception as exc:  # noqa: BLE001
-            close(n, f"**Rejected.** Could not decode that {kind}: `{exc}`", args.dry_run)
+            close(n, f"**Rejected.** Could not decode that {kind}: `{exc}`", args.dry_run, pace)
             rejected += 1
             continue
 
@@ -155,7 +183,7 @@ def main() -> int:
             try:
                 block = Block.from_dict(data)
             except Exception as exc:  # noqa: BLE001
-                close(n, f"**Rejected.** Malformed block: `{exc}`", args.dry_run)
+                close(n, f"**Rejected.** Malformed block: `{exc}`", args.dry_run, pace)
                 rejected += 1
                 continue
 
@@ -172,7 +200,7 @@ def main() -> int:
 
             if block.miner.lower() != author.lower():
                 close(n, f"**Rejected.** This block names `{block.miner}` as the miner "
-                         f"but was submitted by @{author}.", args.dry_run)
+                         f"but was submitted by @{author}.", args.dry_run, pace)
                 rejected += 1
                 continue
 
@@ -182,7 +210,7 @@ def main() -> int:
                     state.next_bits(), state.median_time_past(), int(time.time()),
                 )
             except ConsensusError as exc:
-                close(n, f"**Rejected.** {exc}", args.dry_run)
+                close(n, f"**Rejected.** {exc}", args.dry_run, pace)
                 rejected += 1
                 continue
 
@@ -199,7 +227,7 @@ def main() -> int:
                      f"| | |\n|---|---|\n"
                      f"| hash | `{block.block_hash()}` |\n"
                      f"| miner | @{block.miner} |\n"
-                     f"| reward | `{reward} ROFL` |\n", args.dry_run)
+                     f"| reward | `{reward} ROFL` |\n", args.dry_run, pace)
             accepted += 1
             continue
 
@@ -207,14 +235,14 @@ def main() -> int:
         try:
             tx = Tx.from_dict(data)
         except Exception as exc:  # noqa: BLE001
-            close(n, f"**Rejected.** Malformed transaction: `{exc}`", args.dry_run)
+            close(n, f"**Rejected.** Malformed transaction: `{exc}`", args.dry_run, pace)
             rejected += 1
             continue
         if len(mempool) >= MAX_MEMPOOL:
             print(f"  #{n}: mempool full, leaving open")
             continue
         if any(t.txid() == tx.txid() for t in mempool):
-            close(n, f"Already in the mempool as `{tx.txid()[:20]}…`.", args.dry_run)
+            close(n, f"Already in the mempool as `{tx.txid()[:20]}…`.", args.dry_run, pace)
             rejected += 1
             continue
         working: UTXOSet = state.utxos.copy()
@@ -230,7 +258,7 @@ def main() -> int:
         try:
             fee = validate_tx(tx, working, height)
         except ConsensusError as exc:
-            close(n, f"**Rejected.** {exc}", args.dry_run)
+            close(n, f"**Rejected.** {exc}", args.dry_run, pace)
             rejected += 1
             continue
         mempool.append(tx)
