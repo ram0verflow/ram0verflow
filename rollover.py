@@ -78,9 +78,17 @@ def main() -> int:
         issues[kind] = new_number
         rolled.append((kind, number, new_number))
 
-        gh("issue", "comment", str(number), "--body",
-           f"This thread is full — GitHub stops accepting comments at 2,500.\n\n"
-           f"Submissions continue on **#{new_number}**.")
+        # Not a comment: the thread is full, so a comment on it is refused
+        # with a 403. The signpost has to go in the title and the body.
+        repo = os.environ["GITHUB_REPOSITORY"]
+        old_body = gh("api", f"repos/{repo}/issues/{number}", "--jq", ".body")
+        gh("api", f"repos/{repo}/issues/{number}", "-X", "PATCH",
+           "-f", f"title={TITLES[kind]} (full — see #{new_number})",
+           "-f", "body=" + (
+               f"**This thread is full.** GitHub stops accepting comments at "
+               f"2,500 and reports nothing, which is why submissions here went "
+               f"quiet.\n\nSubmissions continue on **#{new_number}**.\n\n---\n\n"
+               + old_body))
         gh("issue", "lock", str(number), "--reason", "resolved")
 
     if not rolled:
