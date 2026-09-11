@@ -27,6 +27,10 @@
     "address": "rofl1qn2wv00sq9a875c7pmqf4hfu2ca2y7fa0le96wk",
     "pubkey": "0320fe7cbfaa3c853b9f36046c55328e7bf7f57c170b782d26ee48cdc8d3bed088"
   },
+  "lovivi": {
+    "address": "rofl1qgz45v82mfe8ksyyfezss7m2p8udlsdwp0984vv",
+    "pubkey": "02c26c4df7b1f7e975cfdf4bf39bde1726e5da612ecd7f0d5bcb370a64661ba8c0"
+  },
   "uselessfree": {
     "address": "rofl1qm3zqhkwlh85xsaktutuculxhcqnd8vwnj6rt3z",
     "pubkey": "02bfa5c34c8c3a364d705e9f589249febd2a2289c89b434393de2cd4c125430680"
