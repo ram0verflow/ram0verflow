@@ -26,5 +26,9 @@
   "uselessfree": {
     "address": "rofl1qm3zqhkwlh85xsaktutuculxhcqnd8vwnj6rt3z",
     "pubkey": "02bfa5c34c8c3a364d705e9f589249febd2a2289c89b434393de2cd4c125430680"
+  },
+  "ywltby": {
+    "address": "rofl1qrrj2pn86jy9ylnatdwuqfazq0ur5pv7xq9lja3",
+    "pubkey": "02f5fcfacfbf8785781c369f2d2f4223ac17df7705de98f7074bdba797828a58fc"
   }
 }
