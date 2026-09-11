@@ -15,6 +15,10 @@
     "address": "rofl1qdsfz9v9r2hc798k26egt33zxj8ysg4cgwgcw2z",
     "pubkey": "024bfa745b6b3ef528ec8c24df4e9b9df7ed1e931b611f44ff011d506e7f86f9de"
   },
+  "iamgd67": {
+    "address": "rofl1qhqgh92s92snreh5w3afslt2cv3fv7ekuxuz264",
+    "pubkey": "039c7e60b13f32694c0b17a04d1853be30a9785bb86b129729664e854854919507"
+  },
   "k11agent": {
     "address": "rofl1qewcjd6x7catlvufhqr9ml6ul3j2d3up367fzmx",
     "pubkey": "0321a7033ee9541e3b65b5e768d93c6c35a07c8d3ab5e74a6f5366ee6fcad7b06c"
