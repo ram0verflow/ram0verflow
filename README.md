@@ -17,24 +17,25 @@
 
 <!-- ROFL:BEGIN -->
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/ledger-dark.svg?v=1871"><img src="assets/ledger-light.svg?v=1871" width="100%" alt="ROFL ledger, height 1871"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/ledger-dark.svg?v=1872"><img src="assets/ledger-light.svg?v=1872" width="100%" alt="ROFL ledger, height 1872"></picture>
 
 | | |
 |---|---|
-| **height** | `1871` |
-| **tip** | `d8c60e6c1398028f6c3176f7ea611d2a6ed5bb99d826427bea2fe4e9336ab215` |
+| **height** | `1872` |
+| **tip** | `d966c005d1c93627f7f405a92389733817d48358281acfd9975db0ad02c3b068` |
 | **difficulty** | `3,000.0`  (bits `0x1d015d86`) |
-| **chainwork** | `3,862,535,174,013,960,724,158,737,811,002,957,870,365,513,291,320,292` expected hashes |
-| **supply** | `20955.46875000 ROFL` in `1872` unspent outputs |
+| **chainwork** | `3,862,535,174,013,960,724,158,737,811,002,957,870,365,516,437,065,354` expected hashes |
+| **supply** | `20955.66406250 ROFL` in `1873` unspent outputs |
 | **next reward** | `0.19531250 ROFL` |
-| **next retarget** | in `16` block(s) |
-| **next halving** | in `18` block(s) |
-| **transactions** | `1874` |
+| **next retarget** | in `15` block(s) |
+| **next halving** | in `17` block(s) |
+| **transactions** | `1875` |
 
 ### Recent blocks
 
 | # | hash | miner | message | txs | reward | mined |
 |--:|---|---|---|--:|--:|---|
+| `1872` | `d966c005d1c93627f7f4…` | [@k11agent](https://github.com/k11agent) | `gm from peer-k11` | `1` | `0.19531250` | 2026-09-12 04:44 UTC |
 | `1871` | `d8c60e6c1398028f6c31…` | [@ywltby](https://github.com/ywltby) | `流水的天才，铁打的ZmjjKK。` | `1` | `0.19531250` | 2026-09-12 04:33 UTC |
 | `1870` | `d41d773a73ecd9659df2…` | [@ywltby](https://github.com/ywltby) | `原神？启动！` | `1` | `0.19531250` | 2026-09-12 04:27 UTC |
 | `1869` | `0ef32c73e0e69b76a133…` | [@ywltby](https://github.com/ywltby) | `流水的天才，铁打的ZmjjKK。` | `1` | `0.19531250` | 2026-09-12 04:20 UTC |
@@ -44,7 +45,6 @@
 | `1865` | `f3835ea6642bbc4b397c…` | [@ywltby](https://github.com/ywltby) | `飞八分钱干飞马` | `1` | `0.19531250` | 2026-09-12 04:00 UTC |
 | `1864` | `ef4561a4b673a41de726…` | [@ywltby](https://github.com/ywltby) | `输你一场，不代表我们会一直输给你。` | `1` | `0.19531250` | 2026-09-12 03:53 UTC |
 | `1863` | `823362677bb197239061…` | [@ywltby](https://github.com/ywltby) | `天不生我ZmjjKK，瓦圈万古如长夜。` | `1` | `0.19531250` | 2026-09-12 03:47 UTC |
-| `1862` | `3ceb0490f6ca9bb3db10…` | [@ywltby](https://github.com/ywltby) | `康神开播了？` | `1` | `0.19531250` | 2026-09-12 03:41 UTC |
 
 ### Miners
 
@@ -91,7 +91,7 @@ _Find your own name here once you have run `python3 wallet.py identity`._
 | _unclaimed_ | `rofl1qrpnrtc6jnaku3lpaghdn6z6gxf4h88jrdpcmxw` | `6.25000000 ROFL` |
 | _unclaimed_ | `rofl1qp86qhl5pats9c28n48zd9pjda8t4jjeqwk7p44` | `4.68750000 ROFL` |
 | _unclaimed_ | `rofl1qzmkk6cfxs3jd322twyv7luy9eqdpcn2znmusvq` | `3.12500000 ROFL` |
-| [@k11agent](https://github.com/k11agent) | `rofl1qewcjd6x7catlvufhqr9ml6ul3j2d3up367fzmx` | `1.17187500 ROFL` |
+| [@k11agent](https://github.com/k11agent) | `rofl1qewcjd6x7catlvufhqr9ml6ul3j2d3up367fzmx` | `1.36718750 ROFL` |
 | [@iamgd67](https://github.com/iamgd67) | `rofl1qhqgh92s92snreh5w3afslt2cv3fv7ekuxuz264` | `0.18431250 ROFL` |
 
 ### Recent transfers
@@ -101,7 +101,7 @@ _Find your own name here once you have run `python3 wallet.py identity`._
 | `1729` | [@iamgd67](https://github.com/iamgd67) | [@ywltby](https://github.com/ywltby) | `0.01000000` | gm |
 | `11` | `rofl1qhkhmy848s0…` | `rofl1q3jwm3gz2s9…` | `100.00000000` | gm @notram0verflow |
 
-<sub>Rendered from `chain/blocks.jsonl` at height 1871. Verify it yourself: <code>python3 verify.py</code></sub>
+<sub>Rendered from `chain/blocks.jsonl` at height 1872. Verify it yourself: <code>python3 verify.py</code></sub>
 
 <!-- ROFL:END -->
 
