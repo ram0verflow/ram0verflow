@@ -17,24 +17,25 @@
 
 <!-- ROFL:BEGIN -->
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/ledger-dark.svg?v=2032"><img src="assets/ledger-light.svg?v=2032" width="100%" alt="ROFL ledger, height 2032"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/ledger-dark.svg?v=2033"><img src="assets/ledger-light.svg?v=2033" width="100%" alt="ROFL ledger, height 2033"></picture>
 
 | | |
 |---|---|
-| **height** | `2032` |
-| **tip** | `d39d21b2fb1623b033cbfa1073d299f74cf0664703ea71ad39bbb4ad9ee2f443` |
+| **height** | `2033` |
+| **tip** | `1da130f6c305d5274979ea144cce1236ccaa32a258bee59d2aa830aabce6682b` |
 | **difficulty** | `3,000.0`  (bits `0x1d015d86`) |
-| **chainwork** | `3,862,535,174,013,960,724,158,737,811,002,957,870,366,019,756,275,274` expected hashes |
-| **supply** | `20972.94921875 ROFL` in `2033` unspent outputs |
+| **chainwork** | `3,862,535,174,013,960,724,158,737,811,002,957,870,366,022,902,020,336` expected hashes |
+| **supply** | `20973.04687500 ROFL` in `2034` unspent outputs |
 | **next reward** | `0.09765625 ROFL` |
-| **next retarget** | in `15` block(s) |
-| **next halving** | in `67` block(s) |
-| **transactions** | `2035` |
+| **next retarget** | in `14` block(s) |
+| **next halving** | in `66` block(s) |
+| **transactions** | `2036` |
 
 ### Recent blocks
 
 | # | hash | miner | message | txs | reward | mined |
 |--:|---|---|---|--:|--:|---|
+| `2033` | `1da130f6c305d5274979…` | [@iamgd67](https://github.com/iamgd67) | `gm` | `1` | `0.09765625` | 2026-09-12 21:01 UTC |
 | `2032` | `d39d21b2fb1623b033cb…` | [@iamgd67](https://github.com/iamgd67) | `gm` | `1` | `0.09765625` | 2026-09-12 20:56 UTC |
 | `2031` | `3a1b01e6312c63fc5dcd…` | [@ywltby](https://github.com/ywltby) | `康神开播了？` | `1` | `0.09765625` | 2026-09-12 20:41 UTC |
 | `2030` | `7184237b0842568453ba…` | [@ywltby](https://github.com/ywltby) | `不要小瞧EDG所有人的羁绊啊。` | `1` | `0.09765625` | 2026-09-12 20:36 UTC |
@@ -44,7 +45,6 @@
 | `2026` | `6caa1aa208d5184b4e07…` | [@ywltby](https://github.com/ywltby) | `面善打个D啊，喜欢我的战斗脸吗？` | `1` | `0.09765625` | 2026-09-12 20:09 UTC |
 | `2025` | `2df842e471be1d0de524…` | [@iamgd67](https://github.com/iamgd67) | `gm` | `1` | `0.09765625` | 2026-09-12 20:08 UTC |
 | `2024` | `1812e23ed983f63ad3de…` | [@ywltby](https://github.com/ywltby) | `排位，比世界赛决赛还难打。` | `1` | `0.09765625` | 2026-09-12 19:58 UTC |
-| `2023` | `972d4f7e1e2e781d1985…` | [@iamgd67](https://github.com/iamgd67) | `gm` | `1` | `0.09765625` | 2026-09-12 19:53 UTC |
 
 ### Miners
 
@@ -61,7 +61,7 @@
 | [@eltociear](https://github.com/eltociear) | `50` | `2.5%` |
 | [@nodgd](https://github.com/nodgd) | `28` | `1.4%` |
 | [@MingKeZhiNeng](https://github.com/MingKeZhiNeng) | `25` | `1.2%` |
-| [@iamgd67](https://github.com/iamgd67) | `18` | `0.9%` |
+| [@iamgd67](https://github.com/iamgd67) | `19` | `0.9%` |
 
 ### Balances
 
@@ -92,7 +92,7 @@ _Find your own name here once you have run `python3 wallet.py identity`._
 | _unclaimed_ | `rofl1qp86qhl5pats9c28n48zd9pjda8t4jjeqwk7p44` | `4.68750000 ROFL` |
 | _unclaimed_ | `rofl1qzmkk6cfxs3jd322twyv7luy9eqdpcn2znmusvq` | `3.12500000 ROFL` |
 | [@k11agent](https://github.com/k11agent) | `rofl1qewcjd6x7catlvufhqr9ml6ul3j2d3up367fzmx` | `2.05078125 ROFL` |
-| [@iamgd67](https://github.com/iamgd67) | `rofl1qhqgh92s92snreh5w3afslt2cv3fv7ekuxuz264` | `1.84446875 ROFL` |
+| [@iamgd67](https://github.com/iamgd67) | `rofl1qhqgh92s92snreh5w3afslt2cv3fv7ekuxuz264` | `1.94212500 ROFL` |
 | _unclaimed_ | `rofl1qyk9qfjwgth2dfazpx9msskj3sswln76x0x9hqa` | `0.29296875 ROFL` |
 
 ### Recent transfers
@@ -102,7 +102,7 @@ _Find your own name here once you have run `python3 wallet.py identity`._
 | `1729` | [@iamgd67](https://github.com/iamgd67) | [@ywltby](https://github.com/ywltby) | `0.01000000` | gm |
 | `11` | `rofl1qhkhmy848s0…` | `rofl1q3jwm3gz2s9…` | `100.00000000` | gm @notram0verflow |
 
-<sub>Rendered from `chain/blocks.jsonl` at height 2032. Verify it yourself: <code>python3 verify.py</code></sub>
+<sub>Rendered from `chain/blocks.jsonl` at height 2033. Verify it yourself: <code>python3 verify.py</code></sub>
 
 <!-- ROFL:END -->
 
