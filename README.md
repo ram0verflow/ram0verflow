@@ -17,24 +17,25 @@
 
 <!-- ROFL:BEGIN -->
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/ledger-dark.svg?v=2047"><img src="assets/ledger-light.svg?v=2047" width="100%" alt="ROFL ledger, height 2047"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/ledger-dark.svg?v=2048"><img src="assets/ledger-light.svg?v=2048" width="100%" alt="ROFL ledger, height 2048"></picture>
 
 | | |
 |---|---|
-| **height** | `2047` |
-| **tip** | `ab8d48c1a833f3aaf7861c859eae8a84e62cc8546c07fee40513af4a640651a0` |
+| **height** | `2048` |
+| **tip** | `caf60e45341c792861dbdc6fe8a3b4792e6c4b8c9f2c0057242ece6a16e26559` |
 | **difficulty** | `3,000.0`  (bits `0x1d015d86`) |
-| **chainwork** | `3,862,535,174,013,960,724,158,737,811,002,957,870,366,066,942,451,204` expected hashes |
-| **supply** | `20974.41406250 ROFL` in `2048` unspent outputs |
+| **chainwork** | `3,862,535,174,013,960,724,158,737,811,002,957,870,366,070,088,196,266` expected hashes |
+| **supply** | `20974.51171875 ROFL` in `2049` unspent outputs |
 | **next reward** | `0.09765625 ROFL` |
-| **next retarget** | in `16` block(s) |
-| **next halving** | in `52` block(s) |
-| **transactions** | `2050` |
+| **next retarget** | in `15` block(s) |
+| **next halving** | in `51` block(s) |
+| **transactions** | `2051` |
 
 ### Recent blocks
 
 | # | hash | miner | message | txs | reward | mined |
 |--:|---|---|---|--:|--:|---|
+| `2048` | `caf60e45341c792861db…` | [@iamgd67](https://github.com/iamgd67) | `gm` | `1` | `0.09765625` | 2026-09-12 22:43 UTC |
 | `2047` | `ab8d48c1a833f3aaf786…` | [@ywltby](https://github.com/ywltby) | `天不生我ZmjjKK，瓦圈万古如长夜。` | `1` | `0.09765625` | 2026-09-12 22:30 UTC |
 | `2046` | `219d703e547333ab6171…` | [@ywltby](https://github.com/ywltby) | `都是同龄人，我原本没想降维打击。` | `1` | `0.09765625` | 2026-09-12 22:23 UTC |
 | `2045` | `e8a1b1315285d9f0f281…` | [@ywltby](https://github.com/ywltby) | `面善打个D啊，喜欢我的战斗脸吗？` | `1` | `0.09765625` | 2026-09-12 22:16 UTC |
@@ -44,7 +45,6 @@
 | `2041` | `f2d315865f069768f981…` | [@ywltby](https://github.com/ywltby) | `康神开播了？` | `1` | `0.09765625` | 2026-09-12 21:47 UTC |
 | `2040` | `096d0e8591ae448d5e6a…` | [@ywltby](https://github.com/ywltby) | `排位，比世界赛决赛还难打。` | `1` | `0.09765625` | 2026-09-12 21:42 UTC |
 | `2039` | `6b1eb1a7710284c5da87…` | [@ywltby](https://github.com/ywltby) | `T1我们明天就把你送回家。` | `1` | `0.09765625` | 2026-09-12 21:37 UTC |
-| `2038` | `6b7fd50df29c601beb87…` | [@ywltby](https://github.com/ywltby) | `都是同龄人，我原本没想降维打击。` | `1` | `0.09765625` | 2026-09-12 21:30 UTC |
 
 ### Miners
 
@@ -61,7 +61,7 @@
 | [@eltociear](https://github.com/eltociear) | `50` | `2.4%` |
 | [@nodgd](https://github.com/nodgd) | `28` | `1.4%` |
 | [@MingKeZhiNeng](https://github.com/MingKeZhiNeng) | `25` | `1.2%` |
-| [@iamgd67](https://github.com/iamgd67) | `19` | `0.9%` |
+| [@iamgd67](https://github.com/iamgd67) | `20` | `1.0%` |
 
 ### Balances
 
@@ -92,7 +92,7 @@ _Find your own name here once you have run `python3 wallet.py identity`._
 | _unclaimed_ | `rofl1qp86qhl5pats9c28n48zd9pjda8t4jjeqwk7p44` | `4.68750000 ROFL` |
 | _unclaimed_ | `rofl1qzmkk6cfxs3jd322twyv7luy9eqdpcn2znmusvq` | `3.12500000 ROFL` |
 | [@k11agent](https://github.com/k11agent) | `rofl1qewcjd6x7catlvufhqr9ml6ul3j2d3up367fzmx` | `2.05078125 ROFL` |
-| [@iamgd67](https://github.com/iamgd67) | `rofl1qhqgh92s92snreh5w3afslt2cv3fv7ekuxuz264` | `1.94212500 ROFL` |
+| [@iamgd67](https://github.com/iamgd67) | `rofl1qhqgh92s92snreh5w3afslt2cv3fv7ekuxuz264` | `2.03978125 ROFL` |
 | _unclaimed_ | `rofl1qyk9qfjwgth2dfazpx9msskj3sswln76x0x9hqa` | `0.29296875 ROFL` |
 
 ### Recent transfers
@@ -102,7 +102,7 @@ _Find your own name here once you have run `python3 wallet.py identity`._
 | `1729` | [@iamgd67](https://github.com/iamgd67) | [@ywltby](https://github.com/ywltby) | `0.01000000` | gm |
 | `11` | `rofl1qhkhmy848s0…` | `rofl1q3jwm3gz2s9…` | `100.00000000` | gm @notram0verflow |
 
-<sub>Rendered from `chain/blocks.jsonl` at height 2047. Verify it yourself: <code>python3 verify.py</code></sub>
+<sub>Rendered from `chain/blocks.jsonl` at height 2048. Verify it yourself: <code>python3 verify.py</code></sub>
 
 <!-- ROFL:END -->
 
