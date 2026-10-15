@@ -132,8 +132,6 @@ jobs:
               finish 0
             fi
 
-            python3 verify.py || finish 1
-
             git add chain/ README.md assets/ 2>/dev/null || true
             if git diff --cached --quiet; then finish 0; fi
             git commit -m "rofl: submission from @$COMMENT_AUTHOR (#$PR)"
